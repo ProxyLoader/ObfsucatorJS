@@ -93,6 +93,5 @@ fs.mkdir(path.join(__dirname, 'obfuscated'), { recursive: true }, (err) => {
     console.error(`Error creating output directory: ${err}`);
     process.exit(1);
   }
-
   obfuscateFilesInDirectory(directoryPath);
 });
