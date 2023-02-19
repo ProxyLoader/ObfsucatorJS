@@ -2,7 +2,6 @@
 
 
 
-
 const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
@@ -46,34 +45,41 @@ function obfuscateFilesInDirectory(directoryPath) {
   });
 }
 
+
+
 function createZip(directoryPath) {
-  const outputFilePath = path.join(__dirname, 'obfuscated', 'obfuscated.zip');
+  const directoryName = path.basename(directoryPath);
+  const outputFilePath = path.join(__dirname, 'obfuscated', directoryName + '.zip');
   const archive = archiver('zip', { zlib: { level: 9 } });
   const output = fs.createWriteStream(outputFilePath);
 
   archive.pipe(output);
 
-  // Iterate through all files and subdirectories in directoryPath
-  const queue = [directoryPath];
-  while (queue.length > 0) {
-    const currentDirectory = queue.shift();
-    const files = fs.readdirSync(currentDirectory);
+  const files = fs.readdirSync(directoryPath);
 
-    for (const file of files) {
-      const filePath = path.join(currentDirectory, file);
-      const stats = fs.statSync(filePath);
+  for (const file of files) {
+    const filePath = path.join(directoryPath, file);
+    const stats = fs.statSync(filePath);
 
-      if (stats.isDirectory()) {
-        queue.push(filePath);
-      } else if (file.endsWith('.js')) {
-        archive.file(filePath, { name: filePath.slice(directoryPath.length + 1) });
-      }
+    if (stats.isDirectory()) {
+      continue;
+    } else if (file.endsWith('.js')) {
+      archive.file(filePath, { name: path.join(directoryName, file) });
     }
   }
 
   archive.finalize();
-  console.log(`Zip archive created: ${outputFilePath}`);
+
+  archive.on('error', (err) => {
+    console.error(`Error creating zip archive: ${err}`);
+    process.exit(1);
+  });
+
+  output.on('close', () => {
+    console.log(`Zip archive created: ${outputFilePath}`);
+  });
 }
+
 
 const directoryPath = process.argv[2];
 
@@ -82,8 +88,8 @@ if (!directoryPath) {
   process.exit(1);
 }
 
-fs.mkdir(path.join(__dirname, 'obfuscated'), (err) => {
-  if (err && err.code !== 'EEXIST') {
+fs.mkdir(path.join(__dirname, 'obfuscated'), { recursive: true }, (err) => {
+  if (err) {
     console.error(`Error creating output directory: ${err}`);
     process.exit(1);
   }
