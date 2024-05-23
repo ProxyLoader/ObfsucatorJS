@@ -9,7 +9,8 @@ To use ObfuscatorJS, follow these simple steps:
 1. Install the necessary dependencies by running the following command in your terminal:
 ```npm install```
 2. Obfuscate your JavaScript files by running the following command:
-Replace `./examplePath/` with the path to the directory containing the JavaScript files you want to obfuscate.
+```node index.js ./examplePath```
+Replace `./examplePath` with the path to the directory containing the JavaScript files you want to obfuscate.
 
 This command will obfuscate all the JavaScript code in the specified directory and store the encrypted versions in a compressed archive.
 
