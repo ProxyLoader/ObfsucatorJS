@@ -1,0 +1,18 @@
+{
+  "name": "obfsucatorjs-main",
+  "version": "1.0.0",
+  "description": "Obfuscates JavaScript files and stores encrypted versions in a compressed archive.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "javascript-obfuscator": "^4.1.0",
+    "path": "^0.12.7"
+  }
+}
