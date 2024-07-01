@@ -12,7 +12,7 @@
   "dependencies": {
     "archiver": "^7.0.1",
     "fs": "^0.0.1-security",
-    "javascript-obfuscator": "^4.1.0",
+    "javascript-obfuscator": "^4.1.1",
     "path": "^0.12.7"
   }
 }
