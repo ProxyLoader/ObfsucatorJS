@@ -1,0 +1,1 @@
+# Inside the directory "/rar" your project after it obfuscated it will be showen here as a ".rar" so you gonna
