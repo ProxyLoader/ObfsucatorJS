@@ -1,93 +1,86 @@
 const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator');
-const archiver = require('archiver');
-
-function obfuscateFile(filePath) {
-    const originalContent = fs.readFileSync(filePath, 'utf8');
-    const obfuscationResult = JavaScriptObfuscator.obfuscate(originalContent);
-    const obfuscatedContent = obfuscationResult.getObfuscatedCode();
-    fs.writeFileSync(filePath, obfuscatedContent);
-    console.log(`Obfuscated ${filePath}`);
-}
-
-function obfuscateFilesInDirectory(directoryPath) {
-    let i = 0;
-
-    fs.readdir(directoryPath, (err, files) => {
-        if (err) {
-            console.error(`Error reading directory: ${err}`);
-            process.exit(1);
-        }
-
-        files.forEach((file) => {
-            const filePath = path.join(directoryPath, file);
-            const stats = fs.statSync(filePath);
-
-            if (stats.isDirectory()) {
-                obfuscateFilesInDirectory(filePath);
-            } else if (file.endsWith('.js')) {
-                i++;
-                obfuscateFile(filePath);
-            }
-        });
-
-        if (i > 0) {
-            console.log(`Obfuscated ${i} file${i === 1 ? '' : 's'}`);
-            createZip(directoryPath);
-        } else {
-            console.log('No files found to obfuscate');
-        }
-    });
-}
+const AdmZip = require('adm-zip');
+var colors = require('colors');
 
 
+const directoryPath = './models';
+let randomString = generateRandomString(5);
+const archiveName = randomString + ".rar";
+const archiveDirectory = "./rar";
 
-function createZip(directoryPath) {
-    const directoryName = path.basename(directoryPath);
-    const outputFilePath = path.join(__dirname, 'obfuscated', directoryName + '.zip');
-    const archive = archiver('zip', { zlib: { level: 9 } });
-    const output = fs.createWriteStream(outputFilePath);
+let prefix = "(".blue + "root@rixy".red + ")".blue + " # ".red + " "
 
-    archive.pipe(output);
+const obfuscateFiles = (directory, zip) => {
+  const files = fs.readdirSync(directory);
 
-    const files = fs.readdirSync(directoryPath);
+  files.forEach((file) => {
+    const filePath = path.join(directory, file);
+    const stats = fs.statSync(filePath);
 
-    for (const file of files) {
-        const filePath = path.join(directoryPath, file);
-        const stats = fs.statSync(filePath);
+    if (stats.isDirectory()) {
+      const directoryName = path.basename(filePath);
+      zip.addLocalFolder(filePath, directoryName);
 
-        if (stats.isDirectory()) {
-            continue;
-        } else if (file.endsWith('.js')) {
-            archive.file(filePath, { name: path.join(directoryName, file) });
-        }
+      obfuscateFiles(filePath, zip);
+    } else if (file.endsWith('.js')) {
+      const code = fs.readFileSync(filePath, 'utf8');
+
+      const obfuscatedCode = JavaScriptObfuscator.obfuscate(code, {
+        stringArrayEncoding: ['rc4', 'base64'],
+        compact: true,
+        controlFlowFlattening: true,
+        controlFlowFlatteningThreshold: 1,
+        numbersToExpressions: true,
+        stringArrayShuffle: true,
+        stringArrayWrappersType: 'function',
+        target: "node",
+        splitStrings: true,
+        stringArrayThreshold: 1,
+        deadCodeInjection: true,
+        deadCodeInjectionThreshold: 0.9,
+        renameGlobals: true,
+        rotateStringArray: true,
+        transformObjectKeys: true,
+        transformStrings: true,
+        selfDefending: true,
+        stringArrayWrappersCount: 1000,
+        unicodeEscapeSequence: true,
+        transformUnicodeStrings: true,
+        identifierNamesGenerator: 'mangled',
+        splitStringsChunkLength: 1000
+      }).getObfuscatedCode();
+      
+
+
+      console.log(prefix + "Obfsucated ".white + filePath.green + " (Encrypted)".red)
+
+      const relativePath = path.relative(directoryPath, filePath);
+      zip.addFile(relativePath, Buffer.from(obfuscatedCode, 'utf8'));
+    
     }
+  });
+};
 
-    archive.finalize();
+const archivePath = path.join(archiveDirectory, archiveName);
+const zip = new AdmZip();
 
-    archive.on('error', (err) => {
-        console.error(`Error creating zip archive: ${err}`);
-        process.exit(1);
-    });
+obfuscateFiles(directoryPath, zip);
 
-    output.on('close', () => {
-        console.log(`Zip archive created: ${outputFilePath}`);
-    });
-}
+zip.writeZip(archivePath);
 
+console.log(prefix + "Archive successfully created at: ".cyan + archivePath.green + " Enjoy!".magenta);
 
-const directoryPath = process.argv[2];
-
-if (!directoryPath) {
-    console.log('Please provide a directory path');
-    process.exit(1);
-}
-
-fs.mkdir(path.join(__dirname, 'obfuscated'), { recursive: true }, (err) => {
-    if (err) {
-        console.error(`Error creating output directory: ${err}`);
-        process.exit(1);
+function generateRandomString(length) {
+    let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomString = '';
+    
+    for (let i = 0; i < length; i++) {
+      let randomIndex = Math.floor(Math.random() * characters.length);
+      randomString += characters.charAt(randomIndex);
     }
-    obfuscateFilesInDirectory(directoryPath);
-});
+    
+    return randomString;
+  }
+  

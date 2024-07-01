@@ -1,18 +1,21 @@
 {
-  "name": "obfsucatorjs-main",
+  "name": "rixware",
   "version": "1.0.0",
-  "description": "Obfuscates JavaScript files and stores encrypted versions in a compressed archive.",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "author": "ByteBuf",
   "license": "ISC",
   "dependencies": {
-    "archiver": "^7.0.1",
+    "adm-zip": "^0.5.14",
+    "colors": "^1.4.0",
+    "cryptr": "^6.3.0",
     "fs": "^0.0.1-security",
     "javascript-obfuscator": "^4.1.1",
+    "jszip": "^3.10.1",
+    "node-unrar-js": "^2.0.0",
     "path": "^0.12.7"
   }
 }
