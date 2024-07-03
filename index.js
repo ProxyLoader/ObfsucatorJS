@@ -110,7 +110,7 @@ rl.question(prefix + colors.green('Enter the directory path to obfuscate files: 
 });
 
 function generateRandomString(length) {
-  let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let randomString = '';
 
   for (let i = 0; i < length; i++) {
